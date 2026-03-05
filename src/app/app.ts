@@ -16,7 +16,6 @@ export class AppComponent implements OnInit {
   posts: Post[] = [];
   categories: Category[] = [];
 
-  // Variables liées aux champs de saisie (ngModels)
   newCategoryName: string = '';
   newPost = { title: '', content: '', categoryId: '' };
 
@@ -48,5 +47,13 @@ export class AppComponent implements OnInit {
       this.newPost = { title: '', content: '', categoryId: '' };
       this.refreshData();
     });
+  }
+
+  deletePost(id: string) {
+    if (confirm("Es-tu sûr de vouloir supprimer cet article pour toujours ? 🗑️")) {
+      this.postService.delete(id).subscribe(() => {
+        this.refreshData(); 
+      });
+    }
   }
 }
