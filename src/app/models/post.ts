@@ -8,5 +8,9 @@ export interface Post {
   title: string;
   content: string;
   createdDate: string;
-  category: Category; //objet complet 
+  category: Category; // objet compelt 
 }
+
+// type de création
+export type CategoryCreateInput = Omit<Category, 'id'>;
+export type PostCreateInput = { title: string; content: string; categoryId: string; };

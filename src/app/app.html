@@ -1,31 +1,60 @@
 <nav class="navbar navbar-dark bg-dark mb-4 shadow">
   <div class="container">
-    <a class="navbar-brand" href="#">🚀 Mon Blog Dauphine</a>
+    <a class="navbar-brand" href="#">🚀 Blogger Box Admin</a>
   </div>
 </nav>
 
-<div class="container">
-  <h1 class="mb-4">Derniers articles</h1>
-  
-  <div class="row" *ngIf="posts.length > 0">
-    <div class="col-md-4 mb-4" *ngFor="let post of posts">
-      <div class="card h-100 shadow-sm border-primary">
-        <div class="card-body">
-          <span class="badge bg-primary mb-2">{{ post.category?.name }}</span>
-          <h5 class="card-title">{{ post.title }}</h5>
-          <p class="card-text text-truncate" style="max-height: 100px;">{{ post.content }}</p>
+<div class="container pb-5">
+  <div class="row mb-5">
+    <div class="col-md-4">
+      <div class="card p-3 shadow-sm border-success h-100">
+        <h5 class="text-success mb-3">Nouvelle Catégorie</h5>
+        <div class="input-group">
+          <input type="text" class="form-control" [(ngModel)]="newCategoryName" placeholder="Ex: Sport">
+          <button class="btn btn-success" (click)="addCategory()">Ajouter</button>
         </div>
-        <div class="card-footer bg-transparent border-0 text-muted small">
-          Publié le {{ post.createdDate | date:'dd/MM/yyyy' }}
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card p-3 shadow-sm border-primary">
+        <h5 class="text-primary mb-3">Nouvel Article</h5>
+        <div class="row">
+          <div class="col-md-6 mb-2">
+            <input type="text" class="form-control" [(ngModel)]="newPost.title" placeholder="Titre de l'article">
+          </div>
+          <div class="col-md-6 mb-2">
+            <select class="form-select" [(ngModel)]="newPost.categoryId">
+              <option value="">Choisir une catégorie...</option>
+              <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+          <div class="col-12 mb-3">
+            <textarea class="form-control" rows="3" [(ngModel)]="newPost.content" placeholder="Contenu de l'article"></textarea>
+          </div>
+          <div class="col-12 text-end">
+            <button class="btn btn-primary px-4" (click)="addPost()">Publier</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="alert alert-warning shadow-sm" *ngIf="posts.length === 0">
-    <strong>Oups !</strong> Aucun article trouvé. <br>
-    Assure-toi que : <br>
-    1. Le Backend tourne sur le port 8080 <br>
-    2. Tu as relancé le Backend après avoir ajouté le fichier CorsConfig.java
+  <hr class="mb-5">
+
+  <h2 class="mb-4 text-secondary">Articles Récents</h2>
+  <div class="row">
+    <div class="col-md-4 mb-4" *ngFor="let post of posts">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <span class="badge bg-info text-dark mb-2">{{ post.category?.name }}</span>
+          <h5 class="card-title text-primary">{{ post.title }}</h5>
+          <p class="card-text text-muted">{{ post.content }}</p>
+        </div>
+        <div class="card-footer bg-transparent border-0 text-muted small">
+          🗓️ Publié le {{ post.createdDate | date:'dd/MM/yyyy' }}
+        </div>
+      </div>
+    </div>
   </div>
 </div>
