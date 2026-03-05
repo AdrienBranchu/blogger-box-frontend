@@ -1,12 +1,32 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { PostService } from './services/post';
+import { Post } from './models/post';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  standalone: true,
+  imports: [CommonModule, HttpClientModule],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
-  protected readonly title = signal('blogger-box-frontend');
+export class AppComponent implements OnInit {
+  posts: Post[] = [];
+
+  constructor(private postService: PostService) {}
+
+  ngOnInit(): void {
+    this.loadPosts();
+  }
+
+  loadPosts(): void {
+    this.postService.getAll().subscribe({
+      next: (data) => {
+        this.posts = data;
+        console.log('Articles chargés :', this.posts);
+      },
+      error: (err) => console.error('Erreur lors du chargement', err)
+    });
+  }
 }
