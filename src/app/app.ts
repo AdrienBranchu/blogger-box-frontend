@@ -17,13 +17,14 @@ export class AppComponent implements OnInit {
   categories: Category[] = [];
 
   newCategoryName: string = '';
-  
-  // Utilisé pour le formulaire d'article (création ou modification)
   currentPost = { title: '', content: '', categoryId: '' };
   editingPostId: string | null = null;
 
   searchQuery: string = ''; 
   showAdminPanel: boolean = false; 
+  
+  selectedPost: Post | null = null;
+  formError: boolean = false;
 
   constructor(
     private postService: PostService,
@@ -61,9 +62,19 @@ export class AppComponent implements OnInit {
 
   toggleAdminPanel() {
     this.showAdminPanel = !this.showAdminPanel;
+    this.formError = false;
     if (!this.showAdminPanel) {
       this.resetForm();
     }
+  }
+
+  viewPost(post: Post) {
+    this.selectedPost = post;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  closePost() {
+    this.selectedPost = null;
   }
 
   addCategory() {
@@ -75,13 +86,18 @@ export class AppComponent implements OnInit {
   }
 
   savePost() {
-    if (!this.currentPost.title || !this.currentPost.categoryId) return;
+    if (!this.currentPost.title || !this.currentPost.categoryId) {
+      this.formError = true;
+      return;
+    }
+    this.formError = false;
 
     if (this.editingPostId) {
       this.postService.update(this.editingPostId, this.currentPost).subscribe(() => {
         this.resetForm();
         this.refreshData();
         this.showAdminPanel = false;
+        this.selectedPost = null; 
       });
     } else {
       this.postService.create(this.currentPost).subscribe(() => {
@@ -104,8 +120,11 @@ export class AppComponent implements OnInit {
   }
 
   deletePost(id: string) {
-    if (confirm("Confirmer la suppression ?")) {
+    if (confirm("Confirmer la suppression de cet article ?")) {
       this.postService.delete(id).subscribe(() => {
+        if (this.selectedPost && this.selectedPost.id === id) {
+          this.selectedPost = null;
+        }
         this.refreshData();
       });
     }
