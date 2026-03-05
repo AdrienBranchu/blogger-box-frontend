@@ -5,28 +5,22 @@
   .search-overlap { margin-top: -30px; z-index: 10; position: relative; }
 </style>
 
-<div *ngIf="toastMessage" class="position-fixed top-0 end-0 p-4" style="z-index: 2000;">
-  <div class="alert shadow-lg fw-bold" [ngClass]="toastType === 'success' ? 'alert-success' : 'alert-danger'">
-    {{ toastType === 'success' ? '✅' : '🚨' }} {{ toastMessage }}
-  </div>
-</div>
-
 <nav class="navbar navbar-dark bg-dark py-3">
   <div class="container d-flex justify-content-between align-items-center">
     <a class="navbar-brand fw-bold fs-4" href="#">
-      <span class="text-primary">Blogger</span>Box.
+      <span class="text-primary">Blogger</span>Box
     </a>
     <button class="btn btn-outline-light rounded-pill px-4 transition" (click)="toggleAdminPanel()" 
             [ngClass]="{'active': showAdminPanel}">
-      {{ showAdminPanel ? '✖ Fermer' : '⚙️ Dashboard Admin' }}
+      {{ showAdminPanel ? 'Fermer' : 'Administration' }}
     </button>
   </div>
 </nav>
 
 <div class="hero-gradient text-white text-center py-5">
   <div class="container py-4">
-    <h1 class="display-3 fw-bold mb-3">Le Blog Dauphine.</h1>
-    <p class="lead text-white-50 mb-4">Lisez nos derniers articles ou trouvez l'inspiration avec notre moteur de recherche.</p>
+    <h1 class="display-3 fw-bold mb-3">Le Blog Dauphine</h1>
+    <p class="lead text-white-50 mb-4">Consultez nos derniers articles ou effectuez une recherche ciblée.</p>
   </div>
 </div>
 
@@ -35,10 +29,10 @@
     <div class="col-lg-8">
       <div class="card shadow-lg border-0 rounded-pill p-1">
         <div class="input-group input-group-lg">
-          <span class="input-group-text bg-transparent border-0 fs-4 ms-2">🔍</span>
+          <span class="input-group-text bg-transparent border-0 fs-5 text-muted ms-2">Recherche</span>
           <input type="text" class="form-control border-0 shadow-none bg-transparent" 
                  [(ngModel)]="searchQuery" 
-                 placeholder="Chercher un sujet, F1, Technologie...">
+                 placeholder="Saisissez un mot-clé...">
         </div>
       </div>
     </div>
@@ -49,7 +43,7 @@
 
   <div class="card shadow border-0 rounded-4 mb-5 border-top border-primary border-4" *ngIf="showAdminPanel">
     <div class="card-body p-4 p-md-5 bg-light">
-      <h4 class="fw-bold mb-4">🛠️ Panneau de Contrôle</h4>
+      <h4 class="fw-bold mb-4">Panneau d'administration</h4>
       <div class="row g-4">
         
         <div class="col-md-4">
@@ -57,8 +51,8 @@
             <div class="card-body">
               <label class="form-label fw-bold text-success">Créer une catégorie</label>
               <div class="input-group">
-                <input type="text" class="form-control bg-light" [(ngModel)]="newCategoryName" placeholder="Ex: Formule 1">
-                <button class="btn btn-success" (click)="addCategory()">+</button>
+                <input type="text" class="form-control bg-light" [(ngModel)]="newCategoryName" placeholder="Nom de la catégorie">
+                <button class="btn btn-success" (click)="addCategory()">Ajouter</button>
               </div>
             </div>
           </div>
@@ -67,22 +61,27 @@
         <div class="col-md-8">
           <div class="card border-0 shadow-sm rounded-4">
             <div class="card-body">
-              <label class="form-label fw-bold text-primary">Rédiger un article</label>
+              <label class="form-label fw-bold text-primary">
+                {{ editingPostId ? 'Modifier l\'article' : 'Rédiger un article' }}
+              </label>
               <div class="row g-3">
                 <div class="col-md-7">
-                  <input type="text" class="form-control bg-light" [(ngModel)]="newPost.title" placeholder="Titre percutant">
+                  <input type="text" class="form-control bg-light" [(ngModel)]="currentPost.title" placeholder="Titre de l'article">
                 </div>
                 <div class="col-md-5">
-                  <select class="form-select bg-light" [(ngModel)]="newPost.categoryId">
+                  <select class="form-select bg-light" [(ngModel)]="currentPost.categoryId">
                     <option value="">Sélectionner une catégorie...</option>
                     <option *ngFor="let cat of categories" [value]="cat.id">{{ formatCategory(cat.name) }}</option>
                   </select>
                 </div>
                 <div class="col-12">
-                  <textarea class="form-control bg-light" rows="4" [(ngModel)]="newPost.content" placeholder="Il était une fois..."></textarea>
+                  <textarea class="form-control bg-light" rows="4" [(ngModel)]="currentPost.content" placeholder="Contenu de l'article"></textarea>
                 </div>
-                <div class="col-12 text-end">
-                  <button class="btn btn-primary px-5 rounded-pill fw-bold" (click)="addPost()">Publier</button>
+                <div class="col-12 text-end mt-3">
+                  <button class="btn btn-secondary px-4 rounded-pill me-2" *ngIf="editingPostId" (click)="resetForm()">Annuler</button>
+                  <button class="btn btn-primary px-5 rounded-pill fw-bold" (click)="savePost()">
+                    {{ editingPostId ? 'Mettre à jour' : 'Publier' }}
+                  </button>
                 </div>
               </div>
             </div>
@@ -95,15 +94,13 @@
 
   <div class="d-flex justify-content-between align-items-end mb-4 border-bottom pb-2">
     <h2 class="fw-bold mb-0">À la une</h2>
-    <span class="text-muted fw-bold">{{ filteredPosts.length }} article(s) trouvé(s)</span>
+    <span class="text-muted fw-bold">{{ filteredPosts.length }} résultat(s)</span>
   </div>
 
   <div class="row g-4">
     <div class="col-12" *ngIf="filteredPosts.length === 0">
       <div class="text-center py-5 text-muted">
-        <h1 class="display-1 mb-3">📭</h1>
-        <h4>Aucun article ne correspond à ta recherche.</h4>
-        <p>Essaie un autre mot-clé ou ajoute un nouvel article !</p>
+        <h4>Aucun article ne correspond à votre recherche.</h4>
       </div>
     </div>
 
@@ -124,13 +121,12 @@
           </p>
           
           <div class="d-flex justify-content-between align-items-center mt-auto border-top pt-3">
-            <small class="text-muted fw-semibold">📅 {{ post.createdDate | date:'dd MMM yyyy' }}</small>
+            <small class="text-muted fw-semibold">{{ post.createdDate | date:'dd/MM/yyyy' }}</small>
             
-            <button class="btn btn-outline-danger btn-sm rounded-pill" 
-                    *ngIf="showAdminPanel" 
-                    (click)="deletePost(post.id)">
-              🗑️ Supprimer
-            </button>
+            <div *ngIf="showAdminPanel">
+              <button class="btn btn-outline-primary btn-sm rounded-pill me-2" (click)="editPost(post)">Éditer</button>
+              <button class="btn btn-outline-danger btn-sm rounded-pill" (click)="deletePost(post.id)">Supprimer</button>
+            </div>
           </div>
         </div>
       </div>

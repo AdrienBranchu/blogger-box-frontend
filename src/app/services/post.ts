@@ -18,6 +18,10 @@ export class PostService {
     return this.http.post<Post>(this.postsUrl, post);
   }
 
+  update(id: string, post: PostCreateInput): Observable<Post> {
+    return this.http.put<Post>(`${this.postsUrl}/${id}`, post);
+  }
+
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.postsUrl}/${id}`);
   }

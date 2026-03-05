@@ -17,13 +17,13 @@ export class AppComponent implements OnInit {
   categories: Category[] = [];
 
   newCategoryName: string = '';
-  newPost = { title: '', content: '', categoryId: '' };
+  
+  // Utilisé pour le formulaire d'article (création ou modification)
+  currentPost = { title: '', content: '', categoryId: '' };
+  editingPostId: string | null = null;
 
   searchQuery: string = ''; 
   showAdminPanel: boolean = false; 
-  
-  toastMessage: string | null = null;
-  toastType: 'success' | 'danger' = 'success';
 
   constructor(
     private postService: PostService,
@@ -39,7 +39,6 @@ export class AppComponent implements OnInit {
     this.categoryService.getAll().subscribe(data => this.categories = data);
   }
 
-  // Nettoyeur de texte pour les catégories
   formatCategory(name: string): string {
     if (!name) return 'Sans catégorie';
     try {
@@ -62,12 +61,9 @@ export class AppComponent implements OnInit {
 
   toggleAdminPanel() {
     this.showAdminPanel = !this.showAdminPanel;
-  }
-
-  showToast(message: string, type: 'success' | 'danger' = 'success') {
-    this.toastMessage = message;
-    this.toastType = type;
-    setTimeout(() => this.toastMessage = null, 3000);
+    if (!this.showAdminPanel) {
+      this.resetForm();
+    }
   }
 
   addCategory() {
@@ -75,26 +71,48 @@ export class AppComponent implements OnInit {
     this.categoryService.create({ name: this.newCategoryName }).subscribe(() => {
       this.newCategoryName = '';
       this.refreshData();
-      this.showToast('Catégorie ajoutée avec succès !', 'success');
     });
   }
 
-  addPost() {
-    if (!this.newPost.title || !this.newPost.categoryId) return;
-    this.postService.create(this.newPost).subscribe(() => {
-      this.newPost = { title: '', content: '', categoryId: '' };
-      this.refreshData();
-      this.showAdminPanel = false;
-      this.showToast('Article publié en ligne ! 🚀', 'success');
-    });
+  savePost() {
+    if (!this.currentPost.title || !this.currentPost.categoryId) return;
+
+    if (this.editingPostId) {
+      this.postService.update(this.editingPostId, this.currentPost).subscribe(() => {
+        this.resetForm();
+        this.refreshData();
+        this.showAdminPanel = false;
+      });
+    } else {
+      this.postService.create(this.currentPost).subscribe(() => {
+        this.resetForm();
+        this.refreshData();
+        this.showAdminPanel = false;
+      });
+    }
+  }
+
+  editPost(post: Post) {
+    this.editingPostId = post.id;
+    this.currentPost = {
+      title: post.title,
+      content: post.content,
+      categoryId: post.category ? post.category.id : ''
+    };
+    this.showAdminPanel = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   deletePost(id: string) {
-    if (confirm("Es-tu sûr de vouloir supprimer cet article pour toujours ? 🗑️")) {
+    if (confirm("Confirmer la suppression ?")) {
       this.postService.delete(id).subscribe(() => {
         this.refreshData();
-        this.showToast('Article supprimé.', 'danger');
       });
     }
+  }
+
+  resetForm() {
+    this.currentPost = { title: '', content: '', categoryId: '' };
+    this.editingPostId = null;
   }
 }
